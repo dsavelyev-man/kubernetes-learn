@@ -1,0 +1,48 @@
+services:
+  nestjs-api:
+    build:
+      context: ./nestjs-api
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+
+  react-app:
+    build:
+      context: ./react-app
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+
+  rust-axum-api:
+    build:
+      context: ./rust-axum-api
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+
+  rust-axum-service:
+    build:
+      context: ./rust-axum-service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3001"
+
+  nextjs-app:
+    build:
+      context: ./nextjs-app
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3000"
+
+  reverse-proxy:
+    image: nginx:1.27-alpine
+    depends_on:
+      - nestjs-api
+      - react-app
+      - rust-axum-api
+      - rust-axum-service
+      - nextjs-app
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
