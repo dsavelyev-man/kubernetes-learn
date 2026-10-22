@@ -11,6 +11,9 @@ env:
   
 jobs:
   build:
+    strategy:
+      matrix:
+        project: [nestjs-api, nextjs-app]
     permissions:
       contents: read
       packages: write
@@ -29,8 +32,8 @@ jobs:
     - name: Build and publish image
       uses: docker/build-push-action@v6
       with:
-        context: ./nestjs-api
+        context: ./${{ matrix.project }}
         push: ${{ github.event_name != 'pull_request' }}
-        tags:   ghcr.io/dsavelyev-man/nestjs-api:0.0.1
+        tags:   ghcr.io/dsavelyev-man/${{ matrix.project }}:0.0.1
         cache-from: type=gha
         cache-to: type=gha,mode=max%      
