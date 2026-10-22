@@ -2,15 +2,16 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ "main" ]
+    tags:
+      - '*'
   pull_request:
-    branches: [ "main" ]
+  workflow_dispatch:
     
 env:
   REGISTRY: ghcr.io
   
 jobs:
-  build:
+  build-and-push:
     strategy:
       matrix:
         project: [nestjs-api, react-app, rust-axum-api, rust-axum-service, nextjs-app]
