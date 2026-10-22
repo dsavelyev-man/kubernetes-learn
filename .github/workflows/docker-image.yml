@@ -5,14 +5,29 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-
+    
+env:
+  REGISTRY: ghcr.io
+  
 jobs:
-
   build:
-
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
-    - name: Build and push nestjs-api
-      run: docker build ./nestjs-api --file ./nestjs-api/Dockerfile --tag nestjs-api:0.0.1
+    - name: Log in to GitHub Container Registry
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build and publish image
+      uses: docker/build-push-action@v6
+      with:
+        context: ./nestjs-api
+        push: ${{ github.event_name != 'pull_request' }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max%      
