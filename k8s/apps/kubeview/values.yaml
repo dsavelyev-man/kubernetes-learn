@@ -1,0 +1,20 @@
+kubeview:
+  singleNamespace: false
+  disablePodLogs: true
+  debug: false
+  ingress:
+    enabled: false
+  loadBalancer:
+    enabled: false
+  nodePort:
+    enabled: false
+  replicaCount: 1
+
+gateway:
+  name: kubeview-gateway
+  className: eg
+  listenerName: http
+  hostname: kubeview.dsavelyev.ru
+  port: 80
+  serviceName: kubeview
+  servicePort: 8000

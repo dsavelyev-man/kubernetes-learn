@@ -1,0 +1,10 @@
+gateway-helm:
+  config:
+    envoyGateway:
+      gateway:
+        controllerName: gateway.envoyproxy.io/gatewayclass-controller
+
+gatewayClass:
+  create: true
+  name: eg
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller

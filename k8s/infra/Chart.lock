@@ -1,0 +1,9 @@
+dependencies:
+- name: gateway-helm
+  repository: oci://docker.io/envoyproxy
+  version: v1.9.2
+- name: metallb
+  repository: https://metallb.github.io/metallb
+  version: 0.16.1
+digest: sha256:b1332187b23f60df81e4f717938b75bf0e6e1765431ab9e83f6602393ff74ee4
+generated: "2026-10-22T08:40:16.079461+03:00"

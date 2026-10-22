@@ -1,0 +1,11 @@
+apiVersion: v2
+name: kubeview-app
+description: Kubeview application deployment in the apps namespace
+type: application
+version: 0.1.0
+appVersion: 2.2.1
+
+dependencies:
+  - name: kubeview
+    version: 2.2.1
+    repository: "https://code.benco.io/kubeview/deploy/helm"
