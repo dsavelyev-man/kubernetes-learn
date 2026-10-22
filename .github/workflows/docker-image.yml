@@ -13,7 +13,7 @@ jobs:
   build:
     strategy:
       matrix:
-        project: [nestjs-api, nextjs-app]
+        project: [nestjs-api, react-app, rust-axum-api, rust-axum-service, nextjs-app]
     permissions:
       contents: read
       packages: write
