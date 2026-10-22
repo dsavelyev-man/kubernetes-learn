@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build and push nestjs-api
-      run: docker build .nestjs-api --file Dockerfile --tag nestjs-api:0.0.1
+      run: docker build ./nestjs-api --file Dockerfile --tag nestjs-api:0.0.1
