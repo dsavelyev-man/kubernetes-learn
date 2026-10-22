@@ -1,5 +1,6 @@
 services:
   nestjs-api:
+    image: ghcr.io/dsavelyev-man/kubernetes-learn/nestjs-api:0.0.1
     build:
       context: ./nestjs-api
       dockerfile: Dockerfile
@@ -7,6 +8,7 @@ services:
       - "3000:3000"
 
   react-app:
+    image: ghcr.io/dsavelyev-man/kubernetes-learn/react-app:0.0.1
     build:
       context: ./react-app
       dockerfile: Dockerfile
@@ -14,6 +16,7 @@ services:
       - "5173:5173"
 
   rust-axum-api:
+    image: ghcr.io/dsavelyev-man/kubernetes-learn/rust-axum-api:0.0.1
     build:
       context: ./rust-axum-api
       dockerfile: Dockerfile
@@ -21,6 +24,7 @@ services:
       - "3001:3000"
 
   rust-axum-service:
+    image: ghcr.io/dsavelyev-man/kubernetes-learn/rust-axum-service:0.0.1
     build:
       context: ./rust-axum-service
       dockerfile: Dockerfile
@@ -28,21 +32,9 @@ services:
       - "3002:3001"
 
   nextjs-app:
+    image: ghcr.io/dsavelyev-man/kubernetes-learn/nextjs-app:0.0.1
     build:
       context: ./nextjs-app
       dockerfile: Dockerfile
     ports:
       - "3003:3000"
-
-  reverse-proxy:
-    image: nginx:1.27-alpine
-    depends_on:
-      - nestjs-api
-      - react-app
-      - rust-axum-api
-      - rust-axum-service
-      - nextjs-app
-    ports:
-      - "8080:80"
-    volumes:
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
