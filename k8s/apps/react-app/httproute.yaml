@@ -13,7 +13,7 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /react
+            value: /
       backendRefs:
         - name: react-app
           port: 3000

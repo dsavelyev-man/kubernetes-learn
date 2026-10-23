@@ -7,8 +7,8 @@ function App() {
     <div>
       <div>react-app</div>
       <main className="card">
-        <a href="/nestjs-api">nestjs-api</a>
-        <a href="/nextjs-app">nextjs-app</a>
+        <a href="/nestjs">nestjs-api</a>
+        <a href="/nextjs">nextjs-app</a>
         <a href="/rust-axum-api">rust-axum-api</a>
         <a href="/rust-axum-service">rust-axum-service</a>
       </main>
