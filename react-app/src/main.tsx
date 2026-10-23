@@ -1,19 +1,22 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import './style.css';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./style.css";
 
 function App() {
   return (
-    <main className="card">
-      <span className="eyebrow">Your React app is ready</span>
-      <h1>Build something great.</h1>
-      <p>Edit <code>src/main.tsx</code> to get started.</p>
-      <a href="https://react.dev" target="_blank" rel="noreferrer">Explore React <span aria-hidden="true">↗</span></a>
-    </main>
+    <div>
+      <div>react-app</div>
+      <main className="card">
+        <a href="/nestjs-api">nestjs-api</a>
+        <a href="/nextjs-app">nextjs-app</a>
+        <a href="/rust-axum-api">rust-axum-api</a>
+        <a href="/rust-axum-service">rust-axum-service</a>
+      </main>
+    </div>
   );
 }
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <App />
   </StrictMode>,

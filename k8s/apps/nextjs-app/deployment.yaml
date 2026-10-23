@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextjs-app
+  namespace: "apps"
+spec:
+  selector:
+    matchLabels:
+      app: nextjs-app
+  template:
+    metadata:
+      labels:
+        app: nextjs-app
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: nextjs-app
+          image: ghcr.io/dsavelyev-man/nextjs-app:latest
+          imagePullPolicy: "Always"
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"

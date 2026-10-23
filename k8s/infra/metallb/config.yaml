@@ -14,6 +14,9 @@ spec:
       - matchLabels:
           gateway.envoyproxy.io/owning-gateway-name: kubeview-gateway
           gateway.envoyproxy.io/owning-gateway-namespace: apps
+      - matchLabels:
+          gateway.envoyproxy.io/owning-gateway-name: apps
+          gateway.envoyproxy.io/owning-gateway-namespace: apps
 ---
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement

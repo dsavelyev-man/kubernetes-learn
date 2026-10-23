@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: react-app
+  namespace: "apps"
+spec:
+  selector:
+    matchLabels:
+      app: react-app
+  template:
+    metadata:
+      labels:
+        app: react-app
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: react-app
+          image: ghcr.io/dsavelyev-man/react-app:latest
+          imagePullPolicy: "Always"
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"

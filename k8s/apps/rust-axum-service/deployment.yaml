@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rust-axum-service
+  namespace: "apps"
+spec:
+  selector:
+    matchLabels:
+      app: rust-axum-service
+  template:
+    metadata:
+      labels:
+        app: rust-axum-service
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: rust-axum-service
+          image: ghcr.io/dsavelyev-man/rust-axum-service:latest
+          imagePullPolicy: "Always"
+          ports:
+            - containerPort: 3000
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
