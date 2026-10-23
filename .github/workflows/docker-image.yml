@@ -6,19 +6,24 @@ on:
       - '*'
   pull_request:
   workflow_dispatch:
-    
+
 env:
   REGISTRY: ghcr.io
-  
+
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         project: [nestjs-api, react-app, rust-axum-api, rust-axum-service, nextjs-app]
         platform:
-          - { runner: ubuntu-latest, platform: linux/amd64 }
-          - { runner: ubuntu-24.04-arm, platform: linux/arm64 }
+          - runner: ubuntu-latest
+            platform: linux/amd64
+          - runner: ubuntu-24.04-arm
+            platform: linux/arm64
+
     runs-on: ${{ matrix.platform.runner }}
+
     permissions:
       contents: read
       packages: write
@@ -28,39 +33,123 @@ jobs:
 
       - name: Prepare platform variables
         id: prep
+        shell: bash
         run: |
           platform="${{ matrix.platform.platform }}"
           echo "pair=${platform//\//-}" >> "$GITHUB_OUTPUT"
-          
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
-      
+
       - name: Log in to GHCR
+        if: startsWith(github.ref, 'refs/tags/')
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
+      - name: Build image
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: docker/build-push-action@v7
+        with:
+          context: ./${{ matrix.project }}
+          platforms: ${{ matrix.platform.platform }}
+          push: false
+          cache-from: type=gha,scope=${{ matrix.project }}-${{ steps.prep.outputs.pair }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.project }}-${{ steps.prep.outputs.pair }}
+
       - name: Build and push by digest
+        if: startsWith(github.ref, 'refs/tags/')
         id: build
         uses: docker/build-push-action@v7
         with:
           context: ./${{ matrix.project }}
           platforms: ${{ matrix.platform.platform }}
-          outputs: type=image,name=ghcr.io/${{ github.repository_owner }}/${{ matrix.project }},push-by-digest=true,name-canonical=true,push=true
+          outputs: type=image,name=${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.project }},push-by-digest=true,name-canonical=true,push=true
           cache-from: type=gha,scope=${{ matrix.project }}-${{ steps.prep.outputs.pair }}
           cache-to: type=gha,mode=max,scope=${{ matrix.project }}-${{ steps.prep.outputs.pair }}
 
       - name: Export digest
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: bash
         run: |
           mkdir -p /tmp/digests
           digest="${{ steps.build.outputs.digest }}"
           touch "/tmp/digests/${digest#sha256:}"
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload digest
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
         with:
           name: digests-${{ matrix.project }}-${{ steps.prep.outputs.pair }}
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
+
+  merge:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/')
+
+    strategy:
+      matrix:
+        project: [nestjs-api, react-app, rust-axum-api, rust-axum-service, nextjs-app]
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          pattern: digests-${{ matrix.project }}-*
+          path: /tmp/digests
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.project }}
+          tags: |
+            type=ref,event=tag
+            type=raw,value=latest
+
+      - name: Create and push multi-platform manifest
+        shell: bash
+        env:
+          IMAGE: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.project }}
+          TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          tag_args=()
+          while IFS= read -r tag; do
+            [[ -n "$tag" ]] && tag_args+=(--tag "$tag")
+          done <<< "$TAGS"
+
+          digest_args=()
+          for file in /tmp/digests/*; do
+            digest="$(basename "$file")"
+            digest_args+=("${IMAGE}@sha256:${digest}")
+          done
+
+          if [[ "${#digest_args[@]}" -ne 2 ]]; then
+            echo "Expected 2 platform digests, got ${#digest_args[@]}"
+            exit 1
+          fi
+
+          docker buildx imagetools create \
+            "${tag_args[@]}" \
+            "${digest_args[@]}"
